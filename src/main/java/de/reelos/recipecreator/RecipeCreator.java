@@ -1,5 +1,6 @@
 package de.reelos.recipecreator;
 
+import java.io.FileNotFoundException;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -20,7 +21,7 @@ public class RecipeCreator extends JavaPlugin {
         for ( String string : this.jsons ) {
             try {
                 new RecipeReader( "./misc/" + string + ".json" ).registerRecipe();
-            } catch ( CannotParseJsonException ex ) {
+            } catch ( FileNotFoundException | CannotParseJsonException ex ) {
                 getLogger().log( Level.WARNING, "Could not load " + string, ex );
             }
         }

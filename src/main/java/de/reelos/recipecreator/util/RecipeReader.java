@@ -1,7 +1,8 @@
 package de.reelos.recipecreator.util;
 
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,15 +26,15 @@ public class RecipeReader {
     private List<RecipeIngredient> ingredients = new ArrayList<>();
     private String[] recipe = null;
 
-    public RecipeReader( final String target ) throws CannotParseJsonException {
+    public RecipeReader( final String target ) throws CannotParseJsonException, FileNotFoundException {
+        this( new FileInputStream( target ) );
+    }
+
+    public RecipeReader( final InputStream inputStream ) throws CannotParseJsonException {
         final JsonObject jsonObject;
-        try {
-            try ( JsonReader reader = Json.createReader( new FileInputStream( target ) ) ) {
+        try ( JsonReader reader = Json.createReader( inputStream ) ) {
                 jsonObject = reader.readObject();
             }
-        } catch ( IOException ex ) {
-            throw new CannotParseJsonException( "Could not read " + target, ex );
-        }
         try {
             this.recipeType = RecipeType.valueOf( jsonObject.getString( "type", "NONE" ).toUpperCase() );
             switch ( this.recipeType ) {
@@ -45,7 +46,7 @@ public class RecipeReader {
                     throw new CannotParseJsonException( "Wrong or no RecipeType" );
             }
         } catch ( IllegalArgumentException ex ) {
-            throw new CannotParseJsonException( "Could not read " + target, ex );
+            throw new CannotParseJsonException( "Could not read ", ex );
         }
         JsonObject tar = jsonObject.getJsonObject( "for" );
         {
