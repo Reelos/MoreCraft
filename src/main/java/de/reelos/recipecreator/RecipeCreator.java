@@ -7,7 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.google.common.collect.ImmutableSet;
 
-import de.reelos.recipecreator.util.CannotReadJsonException;
+import de.reelos.recipecreator.util.CannotParseJsonException;
 import de.reelos.recipecreator.util.RecipeReader;
 
 public class RecipeCreator extends JavaPlugin {
@@ -21,7 +21,7 @@ public class RecipeCreator extends JavaPlugin {
         for ( String string : this.jsons ) {
             try {
                 new RecipeReader( "./misc/" + string + ".json" );
-            } catch ( CannotReadJsonException ex ) {
+            } catch ( CannotParseJsonException ex ) {
                 getLogger().log( Level.WARNING, "Could not load " + string, ex );
             }
         }

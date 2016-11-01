@@ -27,14 +27,14 @@ public class RecipeReader {
     private String[] recipe = null;
     private Recipe ret;
 
-    public RecipeReader( final String target ) throws CannotReadJsonException {
+    public RecipeReader( final String target ) throws CannotParseJsonException {
         JsonObject json;
         try {
             try ( JsonReader reader = Json.createReader( new FileInputStream( target ) ) ) {
                 json = reader.readObject();
             }
-        } catch ( IOException e ) {
-            throw new CannotReadJsonException( "Could not read " + target, e );
+        } catch ( IOException ex ) {
+            throw new CannotParseJsonException( "Could not read " + target, ex );
         }
         this.recipeType = RecipeType.valueOf( json.getString( "type", "NONE" ).toUpperCase() );
         if ( this.recipeType.equals( RecipeType.NONE ) ) {
