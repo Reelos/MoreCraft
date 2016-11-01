@@ -1,0 +1,22 @@
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+group = 'org.reelos.spigot'
+version = '1.0.0'
+
+sourceCompatibility = 1.8	
+
+repositories {
+	mavenCentral()
+	maven {
+		url 'https://hub.spigotmc.org/nexus/content/groups/public/'
+		url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+		url 'http://maven.elmakers.com/repository/'
+	}
+}
+
+dependencies {
+	compile 'org.spigotmc:spigot-api:1.10.2-R0.1-SNAPSHOT'
+	compile 'org.glassfish:javax.json:1.0.4'
+}
