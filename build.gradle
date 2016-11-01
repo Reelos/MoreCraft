@@ -19,6 +19,8 @@ repositories {
 dependencies {
 	compile 'org.spigotmc:spigot-api:1.10+'
 	compile 'org.glassfish:javax.json:1.0.4'
+	
+	testCompile 'junit:junit:4.12'
 }
 
 eclipse {
