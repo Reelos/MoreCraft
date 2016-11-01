@@ -14,7 +14,6 @@ import javax.json.JsonString;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -25,7 +24,6 @@ public class RecipeReader {
     private RecipeType recipeType = RecipeType.NONE;
     private List<RecipeIngredient> ingredients = new ArrayList<>();
     private String[] recipe = null;
-    private Recipe ret;
 
     public RecipeReader( final String target ) throws CannotParseJsonException {
         JsonObject json;
@@ -79,22 +77,35 @@ public class RecipeReader {
             } );
         }
 
+    }
+
+    public void registerRecipe() {
         switch ( this.recipeType ) {
             case SHAPED:
-                this.ret = new ShapedRecipe( this.craftedItem );
-                ( ( ShapedRecipe ) this.ret ).shape( this.recipe );
-                for ( RecipeIngredient i : this.ingredients ) {
-                    ( ( ShapedRecipe ) this.ret ).setIngredient( i.getTag(), i.getMat() );
-                }
+                createShaped();
                 break;
             case SHAPELESS:
-                this.ret = new ShapelessRecipe( this.craftedItem );
-                for ( RecipeIngredient i : this.ingredients ) {
-                    ( ( ShapelessRecipe ) this.ret ).addIngredient( i.getAmount(), i.getMat() );
-                }
+                createShapeles();
                 break;
+            case FURNACE:
+            case NONE:
             default:
                 break;
+        }
+    }
+
+    private void createShaped() {
+        ShapedRecipe ret = new ShapedRecipe( this.craftedItem );
+        ret.shape( this.recipe );
+        for ( RecipeIngredient i : this.ingredients ) {
+            ret.setIngredient( i.getTag(), i.getMat() );
+        }
+    }
+
+    private void createShapeles() {
+        ShapelessRecipe ret = new ShapelessRecipe( this.craftedItem );
+        for ( RecipeIngredient i : this.ingredients ) {
+            ret.addIngredient( i.getAmount(), i.getMat() );
         }
     }
 

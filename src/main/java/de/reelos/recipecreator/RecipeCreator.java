@@ -14,13 +14,12 @@ public class RecipeCreator extends JavaPlugin {
 
     private final Set<String> jsons = ImmutableSet.of( "dirt", "lava" );
 
-    @SuppressWarnings( "unused" )
     @Override
     public void onEnable() {
         getLogger().log( Level.INFO, "RecipeCreator loaded." );
         for ( String string : this.jsons ) {
             try {
-                new RecipeReader( "./misc/" + string + ".json" );
+                new RecipeReader( "./misc/" + string + ".json" ).registerRecipe();
             } catch ( CannotParseJsonException ex ) {
                 getLogger().log( Level.WARNING, "Could not load " + string, ex );
             }
