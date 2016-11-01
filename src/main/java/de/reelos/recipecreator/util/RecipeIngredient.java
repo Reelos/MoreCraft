@@ -3,31 +3,31 @@ package de.reelos.recipecreator.util;
 import org.bukkit.Material;
 
 public class RecipeIngredient {
-	private final Material mat;
-	private final int amount;
-	private final char tag;
-	
-	public RecipeIngredient(char tag, Material mat) {
-		this.mat = mat;
-		this.tag = tag;
-		this.amount = 1;
-	}
+    private final Material mat;
+    private final int amount;
+    private final char tag;
 
-	public RecipeIngredient(int amount, Material mat) {
-		this.mat = mat;
-		this.tag = ' ';
-		this.amount = amount;
-	}
-	
-	public Material getMat() {
-		return mat;
-	}
-	
-	public int getAmount() {
-		return amount;
-	}
-	
-	public char getTag() {
-		return tag;
-	}
+    public RecipeIngredient( char tag, Material mat ) {
+        this.mat = mat;
+        this.tag = tag;
+        this.amount = 1;
+    }
+
+    public RecipeIngredient( int amount, Material mat ) {
+        this.mat = mat;
+        this.tag = ' ';
+        this.amount = amount;
+    }
+
+    public Material getMat() {
+        return mat;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public char getTag() {
+        return tag;
+    }
 }
