@@ -1,8 +1,12 @@
-/bin/
+
+#gradle
 /build/
-/misc/
-/lib/
-/.settings/
 /.gradle/
-.classpath
+/gradle.properties
+
+#eclipse
 .project
+.classpath
+/.settings/
+/bin/
+

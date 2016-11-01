@@ -20,14 +20,14 @@ public class RecipeIngredient {
     }
 
     public Material getMat() {
-        return mat;
+        return this.mat;
     }
 
     public int getAmount() {
-        return amount;
+        return this.amount;
     }
 
     public char getTag() {
-        return tag;
+        return this.tag;
     }
 }

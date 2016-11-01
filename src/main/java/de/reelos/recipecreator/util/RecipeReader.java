@@ -1,9 +1,8 @@
 package de.reelos.recipecreator.util;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,140 +26,96 @@ public class RecipeReader {
     private RecipeType recipeType = RecipeType.NONE;
     private List<RecipeIngredient> ingredients = new ArrayList<>();
     private String[] recipe = null;
-    private Recipe ret;
 
-    public RecipeReader( String target ) {
+    public RecipeReader( final String target ) throws CannotParseJsonException, FileNotFoundException {
+        this( new FileInputStream( target ) );
+    }
+
+    public RecipeReader( final InputStream inputStream ) throws CannotParseJsonException {
+        final JsonObject jsonObject;
+        try ( JsonReader reader = Json.createReader( inputStream ) ) {
+            jsonObject = reader.readObject();
+        }
         try {
-            JsonObject json;
-            try ( JsonReader reader = Json.createReader( new FileInputStream( target ) ) ) {
-                json = reader.readObject();
-            }
-            this.recipeType = RecipeType.valueOf( json.getString( "type", "NONE" ).toUpperCase() );
-            if ( this.recipeType.equals( RecipeType.NONE ) ) {
-                throw new IllegalArgumentException( "Wrong or no RecipeType" );
-            }
-            JsonObject tar = json.getJsonObject( "for" );
-            {
-                Material mat = Material.getMaterial( tar.getString( "name", "AIR" ).toUpperCase() );
-                if ( mat.equals( Material.AIR ) ) {
-                    throw new RuntimeException( "Wrong or no Material" );
-                }
-                int amount = tar.getInt( "amount", 1 );
-                short meta = ( short ) tar.getInt( "meta", 0 );
-                String dName = tar.getString( "displayName", "" );
-                this.craftedItem = new ItemStack( mat, amount );
-                if ( !dName.matches( "" ) ) {
-                    ItemMeta iMeta = this.craftedItem.getItemMeta();
-                    iMeta.setDisplayName( dName );
-                    this.craftedItem.setItemMeta( iMeta );
-                }
-            }
-            if ( this.recipeType.equals( RecipeType.SHAPED ) ) {
-                JsonArray array = json.getJsonArray( "recipe" );
-                List<String> swap = array.getValuesAs( JsonString.class ).stream().map( ( c ) -> c.getString() )
-                    .collect( Collectors.toList() );
-                this.recipe = swap.toArray( new String[swap.size()] );
-                if ( this.recipe == null ) {
-                    throw new RuntimeException( "Wrong or no Recipe" );
-                }
-                array = json.getJsonArray( "ingredients" );
-                array.getValuesAs( JsonObject.class ).forEach( c -> {
-                    Material mat = Material.getMaterial( c.getString( "name" ).toUpperCase() );
-                    char tag = c.getString( "tag", " " ).charAt( 0 );
-                    this.ingredients.add( new RecipeIngredient( tag, mat ) );
-                } );
-            } else {
-                JsonArray array = json.getJsonArray( "ingredients" );
-                array.getValuesAs( JsonObject.class ).forEach( c -> {
-                    Material mat = Material.getMaterial( c.getString( "name" ).toUpperCase() );
-                    int amount = c.getInt( "amount", 1 );
-                    this.ingredients.add( new RecipeIngredient( amount, mat ) );
-                } );
-            }
-
+            this.recipeType = RecipeType.valueOf( jsonObject.getString( "type", "NONE" ).toUpperCase() );
             switch ( this.recipeType ) {
                 case SHAPED:
-                    this.ret = new ShapedRecipe( this.craftedItem );
-                    ( ( ShapedRecipe ) this.ret ).shape( this.recipe );
-                    for ( RecipeIngredient i : this.ingredients ) {
-                        ( ( ShapedRecipe ) this.ret ).setIngredient( i.getTag(), i.getMat() );
-                    }
-                    break;
                 case SHAPELESS:
-                    this.ret = new ShapelessRecipe( this.craftedItem );
-                    for ( RecipeIngredient i : this.ingredients ) {
-                        ( ( ShapelessRecipe ) this.ret ).addIngredient( i.getAmount(), i.getMat() );
-                    }
+                case FURNACE:
                     break;
                 default:
-                    break;
+                    throw new CannotParseJsonException( "Wrong or no RecipeType" );
             }
-        } catch ( IOException e ) {
-            throw new RuntimeException( e );
+        } catch ( IllegalArgumentException ex ) {
+            throw new CannotParseJsonException( "Could not read ", ex );
+        }
+        JsonObject tar = jsonObject.getJsonObject( "for" );
+        {
+            Material mat = Material.getMaterial( tar.getString( "name", "AIR" ).toUpperCase() );
+            if ( mat.equals( Material.AIR ) ) {
+                throw new CannotParseJsonException( "Wrong or no Material" );
+            }
+            int amount = tar.getInt( "amount", 1 );
+            // short meta = ( short ) tar.getInt( "meta", 0 );
+            String dName = tar.getString( "displayName", "" );
+            this.craftedItem = new ItemStack( mat, amount );
+            if ( !dName.matches( "" ) ) {
+                ItemMeta iMeta = this.craftedItem.getItemMeta();
+                iMeta.setDisplayName( dName );
+                this.craftedItem.setItemMeta( iMeta );
+            }
+        }
+        if ( this.recipeType.equals( RecipeType.SHAPED ) ) {
+            JsonArray array = jsonObject.getJsonArray( "recipe" );
+            List<String> swap = array.getValuesAs( JsonString.class ).stream().map( ( c ) -> c.getString() )
+                .collect( Collectors.toList() );
+            this.recipe = swap.toArray( new String[swap.size()] );
+            if ( this.recipe == null ) {
+                throw new CannotParseJsonException( "Wrong or no Recipe" );
+            }
+            array = jsonObject.getJsonArray( "ingredients" );
+            array.getValuesAs( JsonObject.class ).forEach( c -> {
+                Material mat = Material.getMaterial( c.getString( "name" ).toUpperCase() );
+                char tag = c.getString( "tag", " " ).charAt( 0 );
+                this.ingredients.add( new RecipeIngredient( tag, mat ) );
+            } );
+        } else {
+            JsonArray array = jsonObject.getJsonArray( "ingredients" );
+            List<JsonObject> valuesAsList = array.getValuesAs( JsonObject.class );
+            valuesAsList.forEach( c -> {
+                Material mat = Material.getMaterial( c.getString( "name" ).toUpperCase() );
+                int amount = c.getInt( "amount", 1 );
+                this.ingredients.add( new RecipeIngredient( amount, mat ) );
+            } );
+        }
+
+    }
+
+    public Recipe registerRecipe() {
+        if ( this.recipeType == RecipeType.SHAPED ) {
+            return createShaped();
+        } else if ( this.recipeType == RecipeType.SHAPELESS ) {
+            return createShapeles();
+        } else {
+            return null;
         }
     }
 
-    public void readData( String target ) throws IOException {
-        BufferedReader br = new BufferedReader( new InputStreamReader( new FileInputStream( target ) ) );
-        String line = "";
-        int linecount = 0;
-        while ( ( line = br.readLine() ) != null ) {
-            line = line.trim();
-            if ( line.startsWith( "#" ) ) {
-                continue;
-            }
-            linecount++ ;
-            if ( line.startsWith( "for" ) ) {
-                int datastart = line.indexOf( ':' ) + 1;
-                int dataend = line.length() - 1;
-                short metaType = 0;
-                int stacksize = 1;
-                String name = "";
-                if ( line.contains( "{" ) ) {
-                    dataend = line.indexOf( '{' );
-                    String data = line.substring( line.indexOf( '{' ) + 1, line.length() - 2 );
-
-                    String[] more = data.split( "," );
-                    switch ( more.length ) {
-                        case 3:
-                            if ( !more[2].matches( "" ) )
-                                name = more[2];
-                        case 2:
-                            if ( !more[1].matches( "" ) )
-                                metaType = Short.valueOf( more[1] );
-                        case 1:
-                            if ( !more[0].matches( "" ) ) {
-                                stacksize = Integer.valueOf( more[0] );
-                            }
-                            break;
-                    }
-                }
-                String choose = line.substring( datastart, dataend ).trim().toUpperCase();
-                Material mat = Material.getMaterial( choose );
-                if ( mat == null ) {
-                    break;
-                }
-                this.craftedItem = new ItemStack( mat, stacksize, metaType );
-                if ( !name.matches( "" ) ) {
-                    ItemMeta meta = this.craftedItem.getItemMeta();
-                    meta.setDisplayName( name );
-                    this.craftedItem.setItemMeta( meta );
-                }
-            }
-            if ( line.startsWith( "type" ) ) {
-                line = line.substring( line.indexOf( ':' ) + 1, line.length() - 1 ).trim().toUpperCase();
-                this.recipeType = RecipeType.valueOf( line );
-            }
-            if ( this.recipeType == RecipeType.SHAPED && line.startsWith( "shape" ) ) {
-                if ( line.startsWith( "ingredients" ) ) {
-
-                }
-            }
+    private Recipe createShaped() {
+        ShapedRecipe rec = new ShapedRecipe( this.craftedItem );
+        rec.shape( this.recipe );
+        for ( RecipeIngredient i : this.ingredients ) {
+            rec.setIngredient( i.getTag(), i.getMat() );
         }
+        return rec;
     }
 
-    public static void main( String[] args ) {
-        new RecipeReader( "./misc/dirt.json" );
-        new RecipeReader( "./misc/lava.json" );
+    private Recipe createShapeles() {
+        ShapelessRecipe rec = new ShapelessRecipe( this.craftedItem );
+        for ( RecipeIngredient i : this.ingredients ) {
+            rec.addIngredient( i.getAmount(), i.getMat() );
+        }
+        return rec;
     }
+
 }

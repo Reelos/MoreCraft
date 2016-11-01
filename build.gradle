@@ -17,6 +17,22 @@ repositories {
 }
 
 dependencies {
-	compile 'org.spigotmc:spigot-api:1.10.2-R0.1-SNAPSHOT'
+	compile 'org.spigotmc:spigot-api:1.10+'
 	compile 'org.glassfish:javax.json:1.0.4'
+	
+	testCompile 'junit:junit:4.12'
+}
+
+eclipse {
+	classpath {
+		file.withXml {
+			def spigotApi = it.asNode().children().find{ entry ->
+				return entry['@path'].contains('spigot-api') 
+			}
+			Node attributes = new Node(spigotApi, 'attributes')
+			Node attribute = new Node(attributes, 'attribute')
+			attribute.'@name' = 'javadoc_location'
+			attribute.'@value' = 'https://hub.spigotmc.org/javadocs/spigot/'
+		}
+	}
 }
