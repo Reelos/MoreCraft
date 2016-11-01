@@ -26,23 +26,32 @@ public class RecipeReader {
     private String[] recipe = null;
 
     public RecipeReader( final String target ) throws CannotParseJsonException {
-        JsonObject json;
+        final JsonObject jsonObject;
         try {
             try ( JsonReader reader = Json.createReader( new FileInputStream( target ) ) ) {
-                json = reader.readObject();
+                jsonObject = reader.readObject();
             }
         } catch ( IOException ex ) {
             throw new CannotParseJsonException( "Could not read " + target, ex );
         }
-        this.recipeType = RecipeType.valueOf( json.getString( "type", "NONE" ).toUpperCase() );
-        if ( this.recipeType.equals( RecipeType.NONE ) ) {
-            throw new IllegalArgumentException( "Wrong or no RecipeType" );
+        try {
+            this.recipeType = RecipeType.valueOf( jsonObject.getString( "type", "NONE" ).toUpperCase() );
+            switch ( this.recipeType ) {
+                case SHAPED:
+                case SHAPELESS:
+                case FURNACE:
+                    break;
+                default:
+                    throw new CannotParseJsonException( "Wrong or no RecipeType" );
+            }
+        } catch ( IllegalArgumentException ex ) {
+            throw new CannotParseJsonException( "Could not read " + target, ex );
         }
-        JsonObject tar = json.getJsonObject( "for" );
+        JsonObject tar = jsonObject.getJsonObject( "for" );
         {
             Material mat = Material.getMaterial( tar.getString( "name", "AIR" ).toUpperCase() );
             if ( mat.equals( Material.AIR ) ) {
-                throw new RuntimeException( "Wrong or no Material" );
+                throw new CannotParseJsonException( "Wrong or no Material" );
             }
             int amount = tar.getInt( "amount", 1 );
             // short meta = ( short ) tar.getInt( "meta", 0 );
@@ -55,22 +64,23 @@ public class RecipeReader {
             }
         }
         if ( this.recipeType.equals( RecipeType.SHAPED ) ) {
-            JsonArray array = json.getJsonArray( "recipe" );
+            JsonArray array = jsonObject.getJsonArray( "recipe" );
             List<String> swap = array.getValuesAs( JsonString.class ).stream().map( ( c ) -> c.getString() )
                 .collect( Collectors.toList() );
             this.recipe = swap.toArray( new String[swap.size()] );
             if ( this.recipe == null ) {
-                throw new RuntimeException( "Wrong or no Recipe" );
+                throw new CannotParseJsonException( "Wrong or no Recipe" );
             }
-            array = json.getJsonArray( "ingredients" );
+            array = jsonObject.getJsonArray( "ingredients" );
             array.getValuesAs( JsonObject.class ).forEach( c -> {
                 Material mat = Material.getMaterial( c.getString( "name" ).toUpperCase() );
                 char tag = c.getString( "tag", " " ).charAt( 0 );
                 this.ingredients.add( new RecipeIngredient( tag, mat ) );
             } );
         } else {
-            JsonArray array = json.getJsonArray( "ingredients" );
-            array.getValuesAs( JsonObject.class ).forEach( c -> {
+            JsonArray array = jsonObject.getJsonArray( "ingredients" );
+            List<JsonObject> valuesAsList = array.getValuesAs( JsonObject.class );
+            valuesAsList.forEach( c -> {
                 Material mat = Material.getMaterial( c.getString( "name" ).toUpperCase() );
                 int amount = c.getInt( "amount", 1 );
                 this.ingredients.add( new RecipeIngredient( amount, mat ) );
