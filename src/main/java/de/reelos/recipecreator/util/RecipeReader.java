@@ -95,7 +95,7 @@ public class RecipeReader {
         if ( this.recipeType == RecipeType.SHAPED ) {
             return createShaped();
         } else if ( this.recipeType == RecipeType.SHAPELESS ) {
-            return createShapeles();
+            return createShapeless();
         } else {
             return null;
         }
@@ -110,7 +110,7 @@ public class RecipeReader {
         return rec;
     }
 
-    private Recipe createShapeles() {
+    private Recipe createShapeless() {
         ShapelessRecipe rec = new ShapelessRecipe( this.craftedItem );
         for ( RecipeIngredient i : this.ingredients ) {
             rec.addIngredient( i.getAmount(), i.getMat() );
