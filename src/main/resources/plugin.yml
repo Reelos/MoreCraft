@@ -1,4 +1,4 @@
-name: RecipeCreator
+name: MoreCraft
 main: de.reelos.recipecreator.RecipeCreator
 version: 1.0 SNAP
 commands:
