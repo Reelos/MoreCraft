@@ -13,6 +13,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
@@ -25,7 +26,8 @@ public class RecipeReader {
     private ItemStack craftedItem = new ItemStack( Material.AIR );
     private RecipeType recipeType = RecipeType.NONE;
     private List<RecipeIngredient> ingredients = new ArrayList<>();
-    private String[] recipe = null;
+    private String[] shape = null;
+    private Recipe recipe;
 
     public RecipeReader( final String target ) throws CannotParseJsonException, FileNotFoundException {
         this( new FileInputStream( target ) );
@@ -69,8 +71,8 @@ public class RecipeReader {
             JsonArray array = jsonObject.getJsonArray( "recipe" );
             List<String> swap = array.getValuesAs( JsonString.class ).stream().map( ( c ) -> c.getString() )
                 .collect( Collectors.toList() );
-            this.recipe = swap.toArray( new String[swap.size()] );
-            if ( this.recipe == null ) {
+            this.shape = swap.toArray( new String[swap.size()] );
+            if ( this.shape == null ) {
                 throw new CannotParseJsonException( "Wrong or no Recipe" );
             }
             array = jsonObject.getJsonArray( "ingredients" );
@@ -91,19 +93,24 @@ public class RecipeReader {
 
     }
 
-    public Recipe registerRecipe() {
+    public boolean registerRecipe() {
         if ( this.recipeType == RecipeType.SHAPED ) {
-            return createShaped();
+            this.recipe = createShaped();
         } else if ( this.recipeType == RecipeType.SHAPELESS ) {
-            return createShapeless();
+            this.recipe = createShapeless();
         } else {
-            return null;
+            this.recipe = null;
         }
+        if ( this.recipe == null ) {
+            return false;
+        }
+        boolean added = Bukkit.getServer().addRecipe( this.recipe );
+        return added;
     }
 
     private Recipe createShaped() {
         ShapedRecipe rec = new ShapedRecipe( this.craftedItem );
-        rec.shape( this.recipe );
+        rec.shape( this.shape );
         for ( RecipeIngredient i : this.ingredients ) {
             rec.setIngredient( i.getTag(), i.getMat() );
         }
