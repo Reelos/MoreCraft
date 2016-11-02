@@ -30,7 +30,7 @@ public class RecipeCreator extends JavaPlugin {
 		}
 		for (String string : recipeFolder.toFile().list((File f, String s) -> f.getName().endsWith(".json"))) {
 			try {
-				new RecipeReader("./recipes/" + string + ".json").registerRecipe();
+				new RecipeReader("./recipes/" + string).registerRecipe();
 			} catch (FileNotFoundException | CannotParseJsonException ex) {
 				getLogger().log(Level.WARNING, "Could not load " + string, ex);
 			}
@@ -40,11 +40,5 @@ public class RecipeCreator extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		getLogger().log(Level.INFO, "RecipeCreator unloaded.");
-	}
-
-	public static void main(String[] args) {
-		for (String file : Paths.get("./recipes/").toFile().list()) {
-			System.out.println(file);
-		}
 	}
 }
