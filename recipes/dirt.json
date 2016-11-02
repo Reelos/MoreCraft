@@ -1,0 +1,15 @@
+{
+	"type": "shapeless",
+    "for": {
+        "name": "dirt",
+        "amount": 64,
+        "meta": 4,
+        "displayName": "Crafted Dirt"
+    },
+    "ingredients": [
+        {
+            "name": "sapling",
+            "amount": 4
+        }
+    ]
+}

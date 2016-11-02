@@ -1,0 +1,28 @@
+{
+	"type": "shaped",
+    "for": {
+        "name": "lava_bucket",
+        "amount": 1,
+        "meta": 0,
+        "displayName": "Crafted Lava Bucket"
+    },
+	"recipe": [
+		" c ",
+		" b ",
+		" t "
+	]
+    "ingredients": [
+        {
+            "name": "cobblestone",
+            "tag": c
+        },
+		{
+            "name": "bucket",
+            "tag": b
+        },
+		{
+            "name": "torch",
+            "tag": t
+        }
+    ]
+}
