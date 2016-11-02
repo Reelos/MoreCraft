@@ -10,19 +10,19 @@
 		" c ",
 		" b ",
 		" t "
-	]
+	],
     "ingredients": [
         {
             "name": "cobblestone",
-            "tag": c
+            "tag": "c"
         },
 		{
             "name": "bucket",
-            "tag": b
+            "tag": "b"
         },
 		{
             "name": "torch",
-            "tag": t
+            "tag": "t"
         }
     ]
 }
