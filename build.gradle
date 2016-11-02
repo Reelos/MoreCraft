@@ -23,6 +23,15 @@ dependencies {
 	testCompile 'junit:junit:4.12'
 }
 
+jar {
+	manifest {
+		attributes 'Class-Path' : project.configurations.runtime
+				.collect{ file -> "lib/${file.name}" }
+				.sort{ it.toLowerCase() }
+				.join(' ')
+	}
+}
+
 tasks.withType(Tar) {
 	compression = Compression.GZIP
 }
