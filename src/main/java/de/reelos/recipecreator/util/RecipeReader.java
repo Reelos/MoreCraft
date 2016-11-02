@@ -33,7 +33,8 @@ public class RecipeReader {
         this( new FileInputStream( target ) );
     }
 
-    public RecipeReader( final InputStream inputStream ) throws CannotParseJsonException {
+    @SuppressWarnings("deprecation")
+	public RecipeReader( final InputStream inputStream ) throws CannotParseJsonException {
         final JsonObject jsonObject;
         try ( JsonReader reader = Json.createReader( inputStream ) ) {
             jsonObject = reader.readObject();
@@ -58,9 +59,10 @@ public class RecipeReader {
                 throw new CannotParseJsonException( "Wrong or no Material" );
             }
             int amount = tar.getInt( "amount", 1 );
-            // short meta = ( short ) tar.getInt( "meta", 0 );
+            byte meta = ( byte ) tar.getInt( "meta", 0 );
             String dName = tar.getString( "displayName", "" );
             this.craftedItem = new ItemStack( mat, amount );
+            craftedItem.getData().setData(meta);
             if ( !dName.matches( "" ) ) {
                 ItemMeta iMeta = this.craftedItem.getItemMeta();
                 iMeta.setDisplayName( dName );
