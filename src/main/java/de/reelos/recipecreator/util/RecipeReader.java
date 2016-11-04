@@ -1,17 +1,14 @@
 package de.reelos.recipecreator.util;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonString;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -20,26 +17,31 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.google.gson.Gson;
+
+import de.reelos.recipecreator.entity.MoreRecipe;
+import de.reelos.recipecreator.entity.MoreRecipe.MoreRecipeFor;
+import de.reelos.recipecreator.entity.MoreRecipe.MoreRecipeIngredients;
+
 public class RecipeReader {
 
     private ItemStack craftedItem = new ItemStack( Material.AIR );
     private RecipeType recipeType = RecipeType.NONE;
     private List<RecipeIngredient> ingredients = new ArrayList<>();
     private String[] shape = null;
-    private Recipe recipe;
 
-    public RecipeReader( final String target ) throws CannotParseJsonException, FileNotFoundException {
+    public RecipeReader( final String target ) throws IOException {
         this( new FileInputStream( target ) );
     }
 
-    @SuppressWarnings("deprecation")
-	public RecipeReader( final InputStream inputStream ) throws CannotParseJsonException {
-        final JsonObject jsonObject;
-        try ( JsonReader reader = Json.createReader( inputStream ) ) {
-            jsonObject = reader.readObject();
+    @SuppressWarnings( "deprecation" )
+    public RecipeReader( final InputStream inputStream ) throws IOException {
+        final MoreRecipe moreRecipe;
+        try ( Reader reader = new InputStreamReader( inputStream, StandardCharsets.UTF_8 ) ) {
+            moreRecipe = new Gson().fromJson( reader, MoreRecipe.class );
         }
         try {
-            this.recipeType = RecipeType.valueOf( jsonObject.getString( "type", "NONE" ).toUpperCase() );
+            this.recipeType = RecipeType.valueOf( moreRecipe.getType().toUpperCase() );
             switch ( this.recipeType ) {
                 case SHAPED:
                 case SHAPELESS:
@@ -51,45 +53,35 @@ public class RecipeReader {
         } catch ( IllegalArgumentException ex ) {
             throw new CannotParseJsonException( "Could not read ", ex );
         }
-        JsonObject tar = jsonObject.getJsonObject( "for" );
+        MoreRecipeFor recipeFor = moreRecipe.getFor();
         {
-            Material mat = Material.getMaterial( tar.getString( "name", "AIR" ).toUpperCase() );
+            Material mat = Material.getMaterial( recipeFor.getName().toUpperCase() );
             if ( mat.equals( Material.AIR ) ) {
                 throw new CannotParseJsonException( "Wrong or no Material" );
             }
-            int amount = tar.getInt( "amount", 1 );
-            byte meta = ( byte ) tar.getInt( "meta", 0 );
-            String dName = tar.getString( "displayName", "" );
+            int amount = recipeFor.getAmount();
+            String dName = recipeFor.getDisplayName();
             this.craftedItem = new ItemStack( mat, amount );
-            craftedItem.getData().setData(meta);
+            byte meta = recipeFor.getMeta();
+            this.craftedItem.getData().setData( meta );
             if ( !dName.matches( "" ) ) {
                 ItemMeta iMeta = this.craftedItem.getItemMeta();
                 iMeta.setDisplayName( dName );
                 this.craftedItem.setItemMeta( iMeta );
             }
         }
-        if ( this.recipeType.equals( RecipeType.SHAPED ) ) {
-            JsonArray array = jsonObject.getJsonArray( "recipe" );
-            List<String> swap = array.getValuesAs( JsonString.class ).stream().map( ( c ) -> c.getString() )
-                .collect( Collectors.toList() );
-            this.shape = swap.toArray( new String[swap.size()] );
+        if ( this.recipeType == RecipeType.SHAPED ) {
+            Collection<String> recipe = moreRecipe.getRecipe();
+            this.shape = recipe.toArray( new String[recipe.size()] );
             if ( this.shape == null ) {
                 throw new CannotParseJsonException( "Wrong or no Recipe" );
             }
-            array = jsonObject.getJsonArray( "ingredients" );
-            array.getValuesAs( JsonObject.class ).forEach( c -> {
-                Material mat = Material.getMaterial( c.getString( "name" ).toUpperCase() );
-                char tag = c.getString( "tag", " " ).charAt( 0 );
-                this.ingredients.add( new RecipeIngredient( tag, mat ) );
-            } );
+            Collection<MoreRecipeIngredients> ingredients = moreRecipe.getIngredients();
+            ingredients.forEach( ( it ) -> this.ingredients
+                .add( new RecipeIngredient( it.getTag(), Material.getMaterial( it.getName().toUpperCase() ) ) ) );
         } else {
-            JsonArray array = jsonObject.getJsonArray( "ingredients" );
-            List<JsonObject> valuesAsList = array.getValuesAs( JsonObject.class );
-            valuesAsList.forEach( c -> {
-                Material mat = Material.getMaterial( c.getString( "name" ).toUpperCase() );
-                int amount = c.getInt( "amount", 1 );
-                this.ingredients.add( new RecipeIngredient( amount, mat ) );
-            } );
+            moreRecipe.getIngredients().forEach( it -> this.ingredients
+                .add( new RecipeIngredient( it.getAmount(), Material.getMaterial( it.getName().toUpperCase() ) ) ) );
         }
 
     }
