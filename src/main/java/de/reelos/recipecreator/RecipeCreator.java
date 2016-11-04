@@ -16,15 +16,22 @@ import de.reelos.recipecreator.event.MoreCraftListener;
 import de.reelos.recipecreator.util.CannotParseJsonException;
 import de.reelos.recipecreator.util.RecipeReader;
 
-public class RecipeCreator extends JavaPlugin {
+public final class RecipeCreator extends JavaPlugin {
 
 	private final Path recipeFolder = Paths.get("./recipes/");
 
 	@Override
 	public void onEnable() {
 		getLogger().log(Level.INFO, "MoreCraft loaded.");
-		getServer().getPluginManager().registerEvents(MoreCraftListener.getInstance(), this);
+		registerEvents();
+		registerMoreRecipes();
+	}
 
+	private void registerEvents() {
+		getServer().getPluginManager().registerEvents(MoreCraftListener.getInstance(), this);
+	}
+
+	private void registerMoreRecipes() {
 		if (!Files.exists(this.recipeFolder)) {
 			try {
 				Files.createDirectories(this.recipeFolder);
@@ -51,12 +58,6 @@ public class RecipeCreator extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		getLogger().log(Level.INFO, "MoreCraft unloaded.");
-	}
-
-	public static void main(String[] args) {
-		for (String file : Paths.get("./recipes/").toFile().list()) {
-			System.out.println(file);
-		}
 	}
 
 }
