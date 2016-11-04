@@ -38,20 +38,21 @@ public final class RecipeCreator extends JavaPlugin {
 			} catch (IOException e) {
 				getLogger().log(Level.WARNING, "Could not create 'recipeFolder'.", e);
 			}
-		}
-		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(this.recipeFolder, "*.json")) {
-			for (Path path : directoryStream) {
-				try {
-					Recipe recipe = new RecipeReader(Files.newInputStream(path)).createRecipe();
-					if (recipe != null) {
-						Bukkit.getServer().addRecipe(recipe);
+		} else {
+			try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(this.recipeFolder, "*.json")) {
+				for (Path path : directoryStream) {
+					try {
+						Recipe recipe = new RecipeReader(Files.newInputStream(path)).createRecipe();
+						if (recipe != null) {
+							Bukkit.getServer().addRecipe(recipe);
+						}
+					} catch (FileNotFoundException | CannotParseJsonException ex) {
+						getLogger().log(Level.WARNING, "Could not load " + path, ex);
 					}
-				} catch (FileNotFoundException | CannotParseJsonException ex) {
-					getLogger().log(Level.WARNING, "Could not load " + path, ex);
 				}
+			} catch (IOException ex) {
+				getLogger().log(Level.WARNING, ex.getMessage(), ex);
 			}
-		} catch (IOException ex) {
-			getLogger().log(Level.WARNING, ex.getMessage(), ex);
 		}
 	}
 
