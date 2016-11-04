@@ -13,7 +13,6 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
@@ -95,19 +94,16 @@ public class RecipeReader {
 
     }
 
-    public boolean registerRecipe() {
+    public Recipe createRecipe() {
+        Recipe recipe;
         if ( this.recipeType == RecipeType.SHAPED ) {
-            this.recipe = createShaped();
+            recipe = createShaped();
         } else if ( this.recipeType == RecipeType.SHAPELESS ) {
-            this.recipe = createShapeless();
+            recipe = createShapeless();
         } else {
-            this.recipe = null;
+            recipe = null;
         }
-        if ( this.recipe == null ) {
-            return false;
-        }
-        boolean added = Bukkit.getServer().addRecipe( this.recipe );
-        return added;
+        return recipe;
     }
 
     private Recipe createShaped() {

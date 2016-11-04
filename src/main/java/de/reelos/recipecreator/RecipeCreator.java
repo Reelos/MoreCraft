@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.reelos.recipecreator.util.CannotParseJsonException;
@@ -31,7 +33,10 @@ public class RecipeCreator extends JavaPlugin {
         try ( DirectoryStream<Path> directoryStream = Files.newDirectoryStream( this.recipeFolder, "*.json" ) ) {
             for ( Path path : directoryStream ) {
                 try {
-                    new RecipeReader( Files.newInputStream( path ) ).registerRecipe();
+                    Recipe recipe = new RecipeReader( Files.newInputStream( path ) ).createRecipe();
+                    if ( recipe != null ) {
+                        Bukkit.getServer().addRecipe( recipe );
+                    }
                 } catch ( FileNotFoundException | CannotParseJsonException ex ) {
                     getLogger().log( Level.WARNING, "Could not load " + path, ex );
                 }
