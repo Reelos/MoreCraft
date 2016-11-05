@@ -1,6 +1,5 @@
 package de.reelos.recipecreator;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -13,7 +12,6 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.reelos.recipecreator.event.MoreCraftListener;
-import de.reelos.recipecreator.util.CannotParseJsonException;
 import de.reelos.recipecreator.util.RecipeReader;
 
 public final class RecipeCreator extends JavaPlugin {
@@ -45,8 +43,9 @@ public final class RecipeCreator extends JavaPlugin {
 						Recipe recipe = new RecipeReader(Files.newInputStream(path)).createRecipe();
 						if (recipe != null) {
 							Bukkit.getServer().addRecipe(recipe);
+							getLogger().info("Registered recipe: " + path.getFileName());
 						}
-					} catch (FileNotFoundException | CannotParseJsonException ex) {
+					} catch (Exception ex) {
 						getLogger().log(Level.WARNING, "Could not load " + path, ex);
 					}
 				}
