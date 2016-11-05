@@ -35,17 +35,3 @@ jar {
 tasks.withType(Tar) {
 	compression = Compression.GZIP
 }
-
-eclipse {
-	classpath {
-		file.withXml {
-			def spigotApi = it.asNode().children().find{ entry ->
-				return entry['@path'].contains('spigot-api') 
-			}
-			Node attributes = new Node(spigotApi, 'attributes')
-			Node attribute = new Node(attributes, 'attribute')
-			attribute.'@name' = 'javadoc_location'
-			attribute.'@value' = 'https://hub.spigotmc.org/javadocs/spigot/'
-		}
-	}
-}
