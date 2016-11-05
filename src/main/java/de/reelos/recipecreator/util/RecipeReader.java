@@ -29,14 +29,14 @@ public class RecipeReader {
 	private RecipeType recipeType = RecipeType.NONE;
 	private List<RecipeIngredient> ingredients = new ArrayList<>();
 	private String[] shape = null;
+	private final MoreRecipe moreRecipe;
+	private Recipe recipe;
 
 	public RecipeReader(final String target) throws IOException {
 		this(new FileInputStream(target));
 	}
 
-	@SuppressWarnings("deprecation")
 	public RecipeReader(final InputStream inputStream) throws IOException {
-		final MoreRecipe moreRecipe;
 		try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
 			moreRecipe = new Gson().fromJson(reader, MoreRecipe.class);
 		}
@@ -44,7 +44,11 @@ public class RecipeReader {
 			this.recipeType = RecipeType.valueOf(moreRecipe.getType().toUpperCase());
 			switch (this.recipeType) {
 			case SHAPED:
+				recipe = createShaped();
+				break;
 			case SHAPELESS:
+				recipe = createShapeless();
+				break;
 			case FURNACE:
 				break;
 			default:
@@ -53,6 +57,14 @@ public class RecipeReader {
 		} catch (IllegalArgumentException ex) {
 			throw new CannotParseJsonException("Could not read ", ex);
 		}
+	}
+
+	public Recipe createRecipe() {
+		return recipe;
+	}
+	
+	@SuppressWarnings("deprecation")
+	private void getItem() throws IOException {
 		MoreRecipeFor recipeFor = moreRecipe.getFor();
 		{
 			Material mat = Material.getMaterial(recipeFor.getName().toUpperCase());
@@ -70,34 +82,18 @@ public class RecipeReader {
 				this.craftedItem.setItemMeta(iMeta);
 			}
 		}
-		if (this.recipeType == RecipeType.SHAPED) {
-			Collection<String> recipe = moreRecipe.getRecipe();
-			this.shape = recipe.toArray(new String[recipe.size()]);
-			if (this.shape == null) {
-				throw new CannotParseJsonException("Wrong or no Recipe");
-			}
-			Collection<MoreRecipeIngredients> ingredients = moreRecipe.getIngredients();
-			ingredients.forEach(it -> this.ingredients
-					.add(new RecipeIngredient(it.getTag(), Material.getMaterial(it.getName().toUpperCase()))));
-		} else {
-			moreRecipe.getIngredients().forEach(it -> this.ingredients
-					.add(new RecipeIngredient(it.getAmount(), Material.getMaterial(it.getName().toUpperCase()))));
-		}
 	}
 
-	public Recipe createRecipe() {
-		Recipe recipe;
-		if (this.recipeType == RecipeType.SHAPED) {
-			recipe = createShaped();
-		} else if (this.recipeType == RecipeType.SHAPELESS) {
-			recipe = createShapeless();
-		} else {
-			recipe = null;
+	private Recipe createShaped() throws IOException {
+		getItem();
+		Collection<String> recipe = moreRecipe.getRecipe();
+		this.shape = recipe.toArray(new String[recipe.size()]);
+		if (this.shape == null) {
+			throw new CannotParseJsonException("Wrong or no Recipe");
 		}
-		return recipe;
-	}
-
-	private Recipe createShaped() {
+		Collection<MoreRecipeIngredients> ingredients = moreRecipe.getIngredients();
+		ingredients.forEach(it -> this.ingredients
+				.add(new RecipeIngredient(it.getTag(), Material.getMaterial(it.getName().toUpperCase()))));
 		ShapedRecipe rec = new ShapedRecipe(this.craftedItem);
 		rec.shape(this.shape);
 		for (RecipeIngredient i : this.ingredients) {
@@ -106,7 +102,11 @@ public class RecipeReader {
 		return rec;
 	}
 
-	private Recipe createShapeless() {
+	private Recipe createShapeless() throws IOException {
+		getItem();
+		moreRecipe.getIngredients().forEach(it -> this.ingredients
+				.add(new RecipeIngredient(it.getAmount(), Material.getMaterial(it.getName().toUpperCase()))));
+		
 		ShapelessRecipe rec = new ShapelessRecipe(this.craftedItem);
 		for (RecipeIngredient i : this.ingredients) {
 			rec.addIngredient(i.getAmount(), i.getMat());
