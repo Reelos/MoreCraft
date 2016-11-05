@@ -62,17 +62,17 @@ public class RecipeReader {
 	private ItemStack getItem() throws IOException {
 		MoreRecipeFor recipeFor = this.moreRecipe.getFor();
 		Material mat = Material.getMaterial(recipeFor.getName().toUpperCase());
-		if (mat.equals(Material.AIR)) {
-			throw new CannotParseJsonException("Wrong or no Material");
+		if (mat == null) {
+			throw new CannotParseJsonException("Non readable or no result provided: \"" + recipeFor.getName() + "\"");
 		}
 		int amount = recipeFor.getAmount();
-		String dName = recipeFor.getDisplayName();
+		String displayName = recipeFor.getDisplayName();
 		ItemStack craftedItem = new ItemStack(mat, amount);
 		byte meta = recipeFor.getMeta();
 		craftedItem.getData().setData(meta);
-		if (!dName.matches("")) {
+		if (displayName != null && !displayName.isEmpty()) {
 			ItemMeta iMeta = craftedItem.getItemMeta();
-			iMeta.setDisplayName(dName);
+			iMeta.setDisplayName(displayName);
 			craftedItem.setItemMeta(iMeta);
 		}
 		return craftedItem;
@@ -103,7 +103,11 @@ public class RecipeReader {
 	private Recipe createFurnace() throws IOException {
 		ItemStack craftedItem = getItem();
 		MoreRecipeIngredients ind = this.moreRecipe.getIngredients().iterator().next();
-		return new FurnaceRecipe(craftedItem, Material.getMaterial(ind.getName().toUpperCase()));
+		Material material = Material.getMaterial(ind.getName().toUpperCase());
+		if (material == null) {
+			throw new CannotParseJsonException("Could not identify " + ind.getName());
+		}
+		return new FurnaceRecipe(craftedItem, material);
 	}
 
 }
