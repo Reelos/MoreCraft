@@ -7,11 +7,11 @@
     "ingredients": [
         {
             "name": "gravel",
-            "amount": 2
+            "amount": 1
         },
         {
             "name": "sand",
-            "amount": 2
+            "amount": 1
         }
     ]
 }
