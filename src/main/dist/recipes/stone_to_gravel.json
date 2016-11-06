@@ -1,0 +1,11 @@
+{
+	"type": "furnace",
+    "for": {
+        "name": "gravel"
+    },
+    "ingredients": [
+        {
+            "name": "stone"
+        }
+    ]
+}

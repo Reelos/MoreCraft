@@ -1,0 +1,17 @@
+{
+	"type": "shapeless",
+    "for": {
+        "name": "dirt",
+        "amount": 1
+    },
+    "ingredients": [
+        {
+            "name": "gravel",
+            "amount": 2
+        },
+        {
+            "name": "sand",
+            "amount": 2
+        }
+    ]
+}
