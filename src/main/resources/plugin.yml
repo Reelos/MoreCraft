@@ -1,8 +1,8 @@
 name: MoreCraft
 main: de.reelos.recipecreator.RecipeCreator
-version: 1.12.2.35
+version: 1.12.2.37
 commands:
     reloadRecipes:
-        description: Checks on the recipe folder for new or deleted recipes
+        description: Checks on the recipe folder for new recipes
         permisson: morecraft.reloadrecipes
         usage: /<command>

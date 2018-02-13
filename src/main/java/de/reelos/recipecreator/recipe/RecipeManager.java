@@ -59,20 +59,45 @@ public class RecipeManager {
 	}
 	
 	public void reloadRecipes() {
-		
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(this.recipeFolder, "*.json")) {
+			for (Path path : directoryStream) {
+				boolean isNew = true;
+				String recipeName = path.getFileName().toString();
+				for(RecipeFile recipe: recipes) {
+					if(recipe.getFileName().equals(recipeName)) {
+						isNew = false;
+						break;
+					}
+				}
+				if(isNew) {
+					try (Reader reader = new InputStreamReader(Files.newInputStream(path), StandardCharsets.UTF_8)) {
+						MoreRecipe moreRecipe = new Gson().fromJson(reader, MoreRecipe.class);
+						RecipeFile recipe = new RecipeFile(path.getFileName().toString(), moreRecipe);
+						recipes.add(recipe);
+						registerSingleRecipe(recipe);
+					}
+				}
+			}
+		} catch (IOException ex) {
+			plugin.getLogger().log(Level.WARNING, ex.getMessage(), ex);
+		}
+	}
+	
+	private void registerSingleRecipe(RecipeFile recipeFile) {
+		try {
+			Recipe recipe = new RecipeReader(namespace, recipeFile.getRecipe()).createRecipe();
+			if (recipe != null) {
+				Bukkit.getServer().addRecipe(recipe);
+				plugin.getLogger().info("Registered recipe: " + recipeFile.getFileName());
+			}
+		} catch (Exception ex) {
+			plugin.getLogger().log(Level.WARNING, "Could not load " + recipeFile.getFileName(), ex);
+		}
 	}
 
 	private void registerRecipes() {
 		for (RecipeFile recipeFile : recipes) {
-			try {
-				Recipe recipe = new RecipeReader(namespace, recipeFile.getRecipe()).createRecipe();
-				if (recipe != null) {
-					Bukkit.getServer().addRecipe(recipe);
-					plugin.getLogger().info("Registered recipe: " + recipeFile.getFileName());
-				}
-			} catch (Exception ex) {
-				plugin.getLogger().log(Level.WARNING, "Could not load " + recipeFile.getFileName(), ex);
-			}
+			registerSingleRecipe(recipeFile);
 		}
 	}
 }

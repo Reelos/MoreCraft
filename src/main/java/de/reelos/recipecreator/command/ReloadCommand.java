@@ -21,8 +21,7 @@ public class ReloadCommand implements CommandExecutor {
 		String cmd = command.getName().toLowerCase();
 		
 		if(cmd.equals("reloadrecipes")) {
-			//TODO Create a Manager to keep Track on registered Recipes and
-			//	   write a Method to Add Recipes or remove them, based on the recipe folder
+			plugin.getRecipeManager().reloadRecipes();
 			result = true;
 		}
 		
