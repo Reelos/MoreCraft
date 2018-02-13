@@ -5,7 +5,7 @@ import java.util.Collection;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * @author HerrLock
+ * @author HerrLock, Reelos
  */
 public class MoreRecipe {
 
@@ -35,11 +35,13 @@ public class MoreRecipe {
 		private String name, displayName;
 		private int amount;
 		private byte meta;
+		private MoreRecipeForNBTData nbtData;
 
 		public String getName() {
 			return this.name;
 		}
-
+		
+		@Deprecated
 		public String getDisplayName() {
 			return this.displayName;
 		}
@@ -51,7 +53,55 @@ public class MoreRecipe {
 		public byte getMeta() {
 			return this.meta;
 		}
+		
+		public MoreRecipeForNBTData getNBTData() {
+			return nbtData;
+		}
 
+		public static class MoreRecipeForNBTData {
+			private String displayName, localisedName;
+			private boolean unbreakable;
+			private Collection<String> lore;
+			private Collection<MoreRecipeForEnchantment> enchantments;
+			
+			public String getDisplayName() {
+				return displayName;
+			}
+			
+			public String getLocalisedName() {
+				return localisedName;
+			}
+			
+			public boolean getUnbreakable() {
+				return unbreakable;
+			}
+			
+			public Collection<String> getLore() {
+				return lore;
+			}
+			
+			public Collection<MoreRecipeForEnchantment> getEnchantments() {
+				return enchantments;
+			}
+			
+			public static class MoreRecipeForEnchantment {
+				private String name;
+				private int level;
+				private boolean ignoreRestrictions;
+				
+				public String getName() {
+					return name;
+				}
+				
+				public int getLevel() {
+					return level;
+				}
+				
+				public boolean doIgnoreRestrictions() {
+					return ignoreRestrictions;
+				}
+			}
+		}
 	}
 
 	public static class MoreRecipeIngredients {

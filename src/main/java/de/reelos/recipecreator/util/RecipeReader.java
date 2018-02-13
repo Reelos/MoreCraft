@@ -67,6 +67,7 @@ public class RecipeReader {
 		if (mat == null) {
 			throw new CannotParseJsonException("Non readable or no result provided: \"" + recipeFor.getName() + "\"");
 		}
+		
 		int amount = recipeFor.getAmount();
 		byte meta = recipeFor.getMeta();
 		String displayName = recipeFor.getDisplayName();
