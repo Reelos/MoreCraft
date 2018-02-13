@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
@@ -22,6 +23,7 @@ import com.google.gson.Gson;
 import de.reelos.recipecreator.entity.MoreRecipe;
 import de.reelos.recipecreator.entity.MoreRecipe.MoreRecipeFor;
 import de.reelos.recipecreator.entity.MoreRecipe.MoreRecipeFor.MoreRecipeForNBTData;
+import de.reelos.recipecreator.entity.MoreRecipe.MoreRecipeFor.MoreRecipeForNBTData.MoreRecipeForEnchantment;
 import de.reelos.recipecreator.entity.MoreRecipe.MoreRecipeIngredients;
 
 public class RecipeReader {
@@ -78,11 +80,21 @@ public class RecipeReader {
 		
 		MoreRecipeForNBTData nbtData = recipeFor.getNBTData();
 		ItemMeta iMeta = craftedItem.getItemMeta();
+		
+		if(recipeFor.getDisplayName() != null && !recipeFor.getDisplayName().equals("")) {
+			iMeta.setDisplayName(recipeFor.getDisplayName());
+		}
+		
+		iMeta = syncronizeItemMeta(iMeta, nbtData);
+		craftedItem.setItemMeta(iMeta);
+		
+		return craftedItem;
+	}
+	
+	private ItemMeta syncronizeItemMeta(ItemMeta base, MoreRecipeForNBTData nbtData) {
+		ItemMeta iMeta = base;
+		
 		if (nbtData != null) {
-			if(recipeFor.getDisplayName() != null && !recipeFor.getDisplayName().equals("")) {
-				iMeta.setDisplayName(recipeFor.getDisplayName());
-			}
-			
 			if(nbtData.getDisplayName() != null && !nbtData.getDisplayName().equals("")) {
 				iMeta.setDisplayName(nbtData.getDisplayName());
 			}
@@ -96,10 +108,79 @@ public class RecipeReader {
 			}
 			
 			iMeta.setUnbreakable(nbtData.getUnbreakable());
+			
+			if(nbtData.getEnchantments() != null) {
+				for(MoreRecipeForEnchantment e: nbtData.getEnchantments()) {
+					Enchantment ench = null;
+					if(e.getName().toLowerCase().equals("power")) {
+						ench = Enchantment.ARROW_DAMAGE;
+					} else if(e.getName().toLowerCase().equals("flame")) {
+						ench = Enchantment.ARROW_FIRE;
+					} else if(e.getName().toLowerCase().equals("infinity")) {
+						ench = Enchantment.ARROW_INFINITE;
+					} else if(e.getName().toLowerCase().equals("punch")) {
+						ench = Enchantment.ARROW_KNOCKBACK;
+					} else if(e.getName().toLowerCase().equals("curseofbinding")) {
+						ench = Enchantment.BINDING_CURSE;
+					} else if(e.getName().toLowerCase().equals("sharpness")) {
+						ench = Enchantment.DAMAGE_ALL;
+					} else if(e.getName().toLowerCase().equals("baneofarthropods")) {
+						ench = Enchantment.DAMAGE_ARTHROPODS;
+					} else if(e.getName().toLowerCase().equals("smite")) {
+						ench = Enchantment.DAMAGE_UNDEAD;
+					} else if(e.getName().toLowerCase().equals("depthstrider")) {
+						ench = Enchantment.DEPTH_STRIDER;
+					} else if(e.getName().toLowerCase().equals("efficency")) {
+						ench = Enchantment.DIG_SPEED;
+					} else if(e.getName().toLowerCase().equals("unbreaking")) {
+						ench = Enchantment.DURABILITY;
+					} else if(e.getName().toLowerCase().equals("fireaspect")) {
+						ench = Enchantment.FIRE_ASPECT;
+					} else if(e.getName().toLowerCase().equals("frostwalker")) {
+						ench = Enchantment.FROST_WALKER;
+					} else if(e.getName().toLowerCase().equals("knockback")) {
+						ench = Enchantment.KNOCKBACK;
+					} else if(e.getName().toLowerCase().equals("fortune")) {
+						ench = Enchantment.LOOT_BONUS_BLOCKS;
+					} else if(e.getName().toLowerCase().equals("looting")) {
+						ench = Enchantment.LOOT_BONUS_MOBS;
+					} else if(e.getName().toLowerCase().equals("luckofthesea")) {
+						ench = Enchantment.LUCK;
+					} else if(e.getName().toLowerCase().equals("lure")) {
+						ench = Enchantment.LURE;
+					} else if(e.getName().toLowerCase().equals("mending")) {
+						ench = Enchantment.MENDING;
+					} else if(e.getName().toLowerCase().equals("respiration")) {
+						ench = Enchantment.OXYGEN;
+					} else if(e.getName().toLowerCase().equals("protection")) {
+						ench = Enchantment.PROTECTION_ENVIRONMENTAL;
+					} else if(e.getName().toLowerCase().equals("blastprotection")) {
+						ench = Enchantment.PROTECTION_EXPLOSIONS;
+					} else if(e.getName().toLowerCase().equals("featherfalling")) {
+						ench = Enchantment.PROTECTION_FALL;
+					} else if(e.getName().toLowerCase().equals("fireprotection")) {
+						ench = Enchantment.PROTECTION_FIRE;
+					} else if(e.getName().toLowerCase().equals("projectileprotection")) {
+						ench = Enchantment.PROTECTION_PROJECTILE;
+					} else if(e.getName().toLowerCase().equals("silktouch")) {
+						ench = Enchantment.SILK_TOUCH;
+					} else if(e.getName().toLowerCase().equals("sweepingedge")) {
+						ench = Enchantment.SWEEPING_EDGE;
+					} else if(e.getName().toLowerCase().equals("thorns")) {
+						ench = Enchantment.THORNS;
+					} else if(e.getName().toLowerCase().equals("curseofvanishing")) {
+						ench = Enchantment.VANISHING_CURSE;
+					} else if(e.getName().toLowerCase().equals("aquaaffinity")) {
+						ench = Enchantment.WATER_WORKER;
+					}
+					if(ench != null) {
+						iMeta.addEnchant(ench, e.getLevel(), e.doIgnoreRestrictions());
+					}
+				}
+			}
 		}
-		craftedItem.setItemMeta(iMeta);
 		
-		return craftedItem;
+		return iMeta;
 	}
 
 	private Recipe createShaped() throws IOException {
