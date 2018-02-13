@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -17,6 +18,7 @@ import de.reelos.recipecreator.util.RecipeReader;
 public final class RecipeCreator extends JavaPlugin {
 
 	private final Path recipeFolder = Paths.get("./recipes/");
+	private final NamespacedKey namespace = new NamespacedKey(this, "morecraft");
 
 	@Override
 	public void onEnable() {
@@ -26,7 +28,7 @@ public final class RecipeCreator extends JavaPlugin {
 	}
 
 	private void registerEvents() {
-		getServer().getPluginManager().registerEvents(MoreCraftListener.getInstance(), this);
+		getServer().getPluginManager().registerEvents(MoreCraftListener.getInstance(this), this);
 	}
 
 	private void registerMoreRecipes() {
@@ -40,7 +42,7 @@ public final class RecipeCreator extends JavaPlugin {
 			try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(this.recipeFolder, "*.json")) {
 				for (Path path : directoryStream) {
 					try {
-						Recipe recipe = new RecipeReader(Files.newInputStream(path)).createRecipe();
+						Recipe recipe = new RecipeReader(namespace, Files.newInputStream(path)).createRecipe();
 						if (recipe != null) {
 							Bukkit.getServer().addRecipe(recipe);
 							getLogger().info("Registered recipe: " + path.getFileName());
@@ -59,5 +61,9 @@ public final class RecipeCreator extends JavaPlugin {
 	public void onDisable() {
 		getLogger().log(Level.INFO, "MoreCraft unloaded.");
 	}
-
+	
+	
+	public NamespacedKey getNamespace() {
+		return namespace;
+	}
 }

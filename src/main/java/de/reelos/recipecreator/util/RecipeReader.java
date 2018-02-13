@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
@@ -25,12 +26,14 @@ public class RecipeReader {
 
 	private final MoreRecipe moreRecipe;
 	private final Recipe recipe;
+	private final NamespacedKey namespace;
 
-	public RecipeReader(final String target) throws IOException {
-		this(new FileInputStream(target));
+	public RecipeReader(NamespacedKey namespace, final String target) throws IOException {
+		this(namespace, new FileInputStream(target));
 	}
 
-	public RecipeReader(final InputStream inputStream) throws IOException {
+	public RecipeReader(NamespacedKey namespace, final InputStream inputStream) throws IOException {
+		this.namespace = namespace;
 		try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
 			this.moreRecipe = new Gson().fromJson(reader, MoreRecipe.class);
 		}
@@ -58,7 +61,6 @@ public class RecipeReader {
 		return this.recipe;
 	}
 
-	@SuppressWarnings("deprecation")
 	private ItemStack getItem() throws IOException {
 		MoreRecipeFor recipeFor = this.moreRecipe.getFor();
 		Material mat = Material.getMaterial(recipeFor.getName().toUpperCase());
@@ -66,21 +68,22 @@ public class RecipeReader {
 			throw new CannotParseJsonException("Non readable or no result provided: \"" + recipeFor.getName() + "\"");
 		}
 		int amount = recipeFor.getAmount();
-		String displayName = recipeFor.getDisplayName();
-		ItemStack craftedItem = new ItemStack(mat, amount);
 		byte meta = recipeFor.getMeta();
-		craftedItem.getData().setData(meta);
+		String displayName = recipeFor.getDisplayName();
+		ItemStack craftedItem = new ItemStack(mat, amount, meta);
+		
+		ItemMeta iMeta = craftedItem.getItemMeta();
 		if (displayName != null && !displayName.isEmpty()) {
-			ItemMeta iMeta = craftedItem.getItemMeta();
 			iMeta.setDisplayName(displayName);
-			craftedItem.setItemMeta(iMeta);
 		}
+		craftedItem.setItemMeta(iMeta);
+		
 		return craftedItem;
 	}
 
 	private Recipe createShaped() throws IOException {
 		ItemStack craftedItem = getItem();
-		ShapedRecipe rec = new ShapedRecipe(craftedItem);
+		ShapedRecipe rec = new ShapedRecipe(namespace, craftedItem);
 		rec.shape(this.moreRecipe.getRecipe().toArray(new String[0]));
 		for (MoreRecipeIngredients i : this.moreRecipe.getIngredients()) {
 			RecipeIngredient ind = new RecipeIngredient(i.getTag(), Material.getMaterial(i.getName().toUpperCase()));
@@ -91,7 +94,7 @@ public class RecipeReader {
 
 	private Recipe createShapeless() throws IOException {
 		ItemStack craftedItem = getItem();
-		ShapelessRecipe rec = new ShapelessRecipe(craftedItem);
+		ShapelessRecipe rec = new ShapelessRecipe(namespace, craftedItem);
 		for (MoreRecipeIngredients it : this.moreRecipe.getIngredients()) {
 			RecipeIngredient ind = new RecipeIngredient(it.getAmount(),
 					Material.getMaterial(it.getName().toUpperCase()));
