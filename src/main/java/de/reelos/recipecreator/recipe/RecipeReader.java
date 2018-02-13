@@ -1,11 +1,6 @@
 package de.reelos.recipecreator.recipe;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import org.bukkit.Material;
@@ -18,13 +13,12 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.google.gson.Gson;
-
+import de.reelos.recipecreator.json.CannotParseJsonException;
 import de.reelos.recipecreator.json.MoreRecipe;
 import de.reelos.recipecreator.json.MoreRecipe.MoreRecipeFor;
-import de.reelos.recipecreator.json.MoreRecipe.MoreRecipeIngredients;
 import de.reelos.recipecreator.json.MoreRecipe.MoreRecipeFor.MoreRecipeForNBTData;
 import de.reelos.recipecreator.json.MoreRecipe.MoreRecipeFor.MoreRecipeForNBTData.MoreRecipeForEnchantment;
+import de.reelos.recipecreator.json.MoreRecipe.MoreRecipeIngredients;
 
 public class RecipeReader {
 
@@ -32,15 +26,10 @@ public class RecipeReader {
 	private final Recipe recipe;
 	private final NamespacedKey namespace;
 
-	public RecipeReader(NamespacedKey namespace, final String target) throws IOException {
-		this(namespace, new FileInputStream(target));
-	}
-
-	public RecipeReader(NamespacedKey namespace, final InputStream inputStream) throws IOException {
+	public RecipeReader(NamespacedKey namespace, final MoreRecipe moreRecipe) throws IOException {
 		this.namespace = namespace;
-		try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-			this.moreRecipe = new Gson().fromJson(reader, MoreRecipe.class);
-		}
+		this.moreRecipe = moreRecipe;
+		
 		try {
 			RecipeType recipeType = RecipeType.valueOf(this.moreRecipe.getType().toUpperCase());
 			switch (recipeType) {
