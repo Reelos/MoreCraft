@@ -1,0 +1,38 @@
+{
+	"type": "shaped",
+	"for": {
+		"name": "wood_sword",
+		"amount": 1,
+		"meta": 0,
+		"nbtData": {
+			"displayName": "Sand Schwert",
+			"unbreakable": true,
+			"lore": [
+				"Ein Schwert das aus Sand gefertigt wurde.",
+				"Sehr instabil, aber Effektiv."
+			],
+			"enchantments": [
+				{
+					"name": "sharpness",
+					"level": 10,
+					"ignoreRestrictions": true
+				}
+			]
+		}
+	},
+	"recipe": [
+		" s ",
+		" s ",
+		" h "
+	],
+	"ingredients": [
+		{
+			"name": "sand",
+			"tag": "s"
+		},
+		{
+			"name": "stick",
+			"tag": "h"
+		}
+	]
+}
