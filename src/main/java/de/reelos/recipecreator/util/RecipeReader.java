@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -20,6 +21,7 @@ import com.google.gson.Gson;
 
 import de.reelos.recipecreator.entity.MoreRecipe;
 import de.reelos.recipecreator.entity.MoreRecipe.MoreRecipeFor;
+import de.reelos.recipecreator.entity.MoreRecipe.MoreRecipeFor.MoreRecipeForNBTData;
 import de.reelos.recipecreator.entity.MoreRecipe.MoreRecipeIngredients;
 
 public class RecipeReader {
@@ -61,6 +63,8 @@ public class RecipeReader {
 		return this.recipe;
 	}
 
+	
+	@SuppressWarnings("deprecation")
 	private ItemStack getItem() throws IOException {
 		MoreRecipeFor recipeFor = this.moreRecipe.getFor();
 		Material mat = Material.getMaterial(recipeFor.getName().toUpperCase());
@@ -70,12 +74,28 @@ public class RecipeReader {
 		
 		int amount = recipeFor.getAmount();
 		byte meta = recipeFor.getMeta();
-		String displayName = recipeFor.getDisplayName();
 		ItemStack craftedItem = new ItemStack(mat, amount, meta);
 		
+		MoreRecipeForNBTData nbtData = recipeFor.getNBTData();
 		ItemMeta iMeta = craftedItem.getItemMeta();
-		if (displayName != null && !displayName.isEmpty()) {
-			iMeta.setDisplayName(displayName);
+		if (nbtData != null) {
+			if(recipeFor.getDisplayName() != null && !recipeFor.getDisplayName().equals("")) {
+				iMeta.setDisplayName(recipeFor.getDisplayName());
+			}
+			
+			if(nbtData.getDisplayName() != null && !nbtData.getDisplayName().equals("")) {
+				iMeta.setDisplayName(nbtData.getDisplayName());
+			}
+			
+			if(nbtData.getLocalizedName() != null && !nbtData.getLocalizedName().equals("")) {
+				iMeta.setLocalizedName(nbtData.getLocalizedName());
+			}
+			
+			if(nbtData.getLore() != null) {
+				iMeta.setLore(new ArrayList<>(nbtData.getLore()));
+			}
+			
+			iMeta.setUnbreakable(nbtData.getUnbreakable());
 		}
 		craftedItem.setItemMeta(iMeta);
 		

@@ -68,7 +68,7 @@ public class MoreRecipe {
 				return displayName;
 			}
 			
-			public String getLocalisedName() {
+			public String getLocalizedName() {
 				return localisedName;
 			}
 			
