@@ -13,7 +13,7 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.reelos.recipecreator.event.MoreCraftListener;
-import de.reelos.recipecreator.util.RecipeReader;
+import de.reelos.recipecreator.recipe.RecipeReader;
 
 public final class RecipeCreator extends JavaPlugin {
 

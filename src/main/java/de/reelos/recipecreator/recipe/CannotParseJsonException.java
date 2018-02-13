@@ -1,4 +1,4 @@
-package de.reelos.recipecreator.util;
+package de.reelos.recipecreator.recipe;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package de.reelos.recipecreator.entity;
+package de.reelos.recipecreator.json;
 
 import java.util.Collection;
 

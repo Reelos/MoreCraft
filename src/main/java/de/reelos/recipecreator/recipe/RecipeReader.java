@@ -1,4 +1,4 @@
-package de.reelos.recipecreator.util;
+package de.reelos.recipecreator.recipe;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,11 +20,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.google.gson.Gson;
 
-import de.reelos.recipecreator.entity.MoreRecipe;
-import de.reelos.recipecreator.entity.MoreRecipe.MoreRecipeFor;
-import de.reelos.recipecreator.entity.MoreRecipe.MoreRecipeFor.MoreRecipeForNBTData;
-import de.reelos.recipecreator.entity.MoreRecipe.MoreRecipeFor.MoreRecipeForNBTData.MoreRecipeForEnchantment;
-import de.reelos.recipecreator.entity.MoreRecipe.MoreRecipeIngredients;
+import de.reelos.recipecreator.json.MoreRecipe;
+import de.reelos.recipecreator.json.MoreRecipe.MoreRecipeFor;
+import de.reelos.recipecreator.json.MoreRecipe.MoreRecipeIngredients;
+import de.reelos.recipecreator.json.MoreRecipe.MoreRecipeFor.MoreRecipeForNBTData;
+import de.reelos.recipecreator.json.MoreRecipe.MoreRecipeFor.MoreRecipeForNBTData.MoreRecipeForEnchantment;
 
 public class RecipeReader {
 
