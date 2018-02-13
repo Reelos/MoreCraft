@@ -17,12 +17,11 @@ import de.reelos.recipecreator.util.RecipeReader;
 
 public final class RecipeCreator extends JavaPlugin {
 
-	private final Path recipeFolder = Paths.get("./recipes/");
+	private final Path recipeFolder = Paths.get(".plugins/MoreCraft/recipes/");
 	private final NamespacedKey namespace = new NamespacedKey(this, "morecraft");
 
 	@Override
 	public void onEnable() {
-		getLogger().log(Level.INFO, "MoreCraft loaded.");
 		registerEvents();
 		registerMoreRecipes();
 	}
@@ -59,7 +58,6 @@ public final class RecipeCreator extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		getLogger().log(Level.INFO, "MoreCraft unloaded.");
 	}
 	
 	
